@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+  <title>Happy Birthday 🎉</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+      font-family: monospace;
+      height: 100%;
+      width: 100%;
+      color: white;
+    }
+
+    canvas {
+      display: block;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      font-size: 3rem;
+      color: #ff69b4;
+      z-index: 2;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    #rotate-warning {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      display: none;
+    }
+
+    #rotate-warning img {
+      width: 80px;
+      height: auto;
+      animation: rotatePulse 2s infinite;
+    }
+
+    @keyframes rotatePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    @media screen and (orientation: portrait) {
+      #rotate-warning {
+        display: block;
+      }
+      #main-content {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas"></canvas>
+
+  <div id="rotate-warning">
+    <img src="https://img.icons8.com/ios-filled/100/ffffff/rotate-right.png" alt="Rotate device">
+  </div>
+
+  <div id="main-content">
+    <div class="center-text" id="text1">3</div>
+    <div class="center-text" id="text2">2</div>
+    <div class="center-text" id="text3">1</div>
+    <div class="center-text" id="text4">Happy...</div>
+    <div class="center-text" id="text5">Birthday...</div>
+    <div class="center-text" id="text6">To...</div>
+    <div class="center-text" id="text7">You 🎉</div>
+  </div>
+
+  <script>
+    // MATRIX EFFECT
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters = "HAPPY BIRTHDAY ".split("");
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = Array.from({ length: Math.floor(columns) }, () => Math.random() * canvas.height / fontSize);
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#ff69b4";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const charIndex = (i + Math.floor(drops[i])) % letters.length;
+        const text = letters[charIndex];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 50);
+
+    // TEXT SEQUENCE
+    const messages = [
+      { id: "text1", delay: 500 },
+      { id: "text2", delay: 1000 },
+      { id: "text3", delay: 1500 },
+      { id: "text4", delay: 2500 },
+      { id: "text5", delay: 3500 },
+      { id: "text6", delay: 4500 },
+      { id: "text7", delay: 5500 },
+    ];
+
+    window.onload = () => {
+      messages.forEach((msg, index) => {
+        setTimeout(() => {
+          document.getElementById(msg.id).style.opacity = 1;
+          if (index > 0) {
+            document.getElementById(messages[index - 1].id).style.opacity = 0;
+          }
+        }, msg.delay);
+      });
+    };
+
+    // Resize canvas on window resize
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
