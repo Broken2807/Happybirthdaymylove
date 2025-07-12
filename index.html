@@ -17,7 +17,7 @@
     }
 
     canvas {
-      display: block;
+      display: none;
       position: fixed;
       top: 0;
       left: 0;
@@ -30,7 +30,7 @@
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      font-size: 3rem;
+      font-size: 4rem;
       color: #ff69b4;
       z-index: 2;
       white-space: nowrap;
@@ -45,17 +45,28 @@
       transform: translate(-50%, -50%);
       z-index: 10;
       display: none;
+      text-align: center;
     }
 
     #rotate-warning img {
-      width: 80px;
+      width: 100px;
       height: auto;
       animation: rotatePulse 2s infinite;
+    }
+
+    #rotate-warning p {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: white;
     }
 
     @keyframes rotatePulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.2); }
+    }
+
+    #main-content {
+      display: none;
     }
 
     @media screen and (orientation: portrait) {
@@ -66,6 +77,15 @@
         display: none;
       }
     }
+
+    @media screen and (orientation: landscape) {
+      #rotate-warning {
+        display: none;
+      }
+      #main-content {
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
@@ -73,6 +93,7 @@
 
   <div id="rotate-warning">
     <img src="https://img.icons8.com/ios-filled/100/ffffff/rotate-right.png" alt="Rotate device">
+    <p>Please rotate your phone</p>
   </div>
 
   <div id="main-content">
@@ -86,19 +107,23 @@
   </div>
 
   <script>
-    // MATRIX EFFECT
     const canvas = document.getElementById('matrixCanvas');
     const ctx = canvas.getContext('2d');
+    const fontSize = 16;
+    let drops = [];
+    let animationRunning = false;
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    function initMatrix() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const columns = Math.floor(canvas.width / fontSize);
+      drops = Array.from({ length: columns }).fill(1);
+    }
 
     const letters = "HAPPY BIRTHDAY ".split("");
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
-    const drops = Array.from({ length: Math.floor(columns) }, () => Math.random() * canvas.height / fontSize);
 
     function drawMatrix() {
+      if (!animationRunning) return;
       ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -118,20 +143,25 @@
       }
     }
 
-    setInterval(drawMatrix, 50);
+    function startMatrix() {
+      if (!animationRunning) {
+        canvas.style.display = 'block';
+        animationRunning = true;
+        setInterval(drawMatrix, 40);
+      }
+    }
 
-    // TEXT SEQUENCE
     const messages = [
       { id: "text1", delay: 500 },
-      { id: "text2", delay: 1000 },
-      { id: "text3", delay: 1500 },
-      { id: "text4", delay: 2500 },
-      { id: "text5", delay: 3500 },
-      { id: "text6", delay: 4500 },
-      { id: "text7", delay: 5500 },
+      { id: "text2", delay: 1500 },
+      { id: "text3", delay: 2500 },
+      { id: "text4", delay: 4000 },
+      { id: "text5", delay: 5500 },
+      { id: "text6", delay: 7000 },
+      { id: "text7", delay: 8500 }
     ];
 
-    window.onload = () => {
+    function showMessages() {
       messages.forEach((msg, index) => {
         setTimeout(() => {
           document.getElementById(msg.id).style.opacity = 1;
@@ -140,12 +170,35 @@
           }
         }, msg.delay);
       });
-    };
+    }
 
-    // Resize canvas on window resize
+    function onLandscape() {
+      setTimeout(() => {
+        initMatrix();
+        startMatrix();
+        showMessages();
+      }, 1000);
+    }
+
+    // On load
+    window.addEventListener("load", () => {
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        onLandscape();
+      }
+    });
+
+    // On orientation change
+    window.addEventListener("orientationchange", () => {
+      if (window.matchMedia("(orientation: landscape)").matches) {
+        onLandscape();
+      }
+    });
+
+    // Also resize canvas on screen resize
     window.addEventListener("resize", () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      if (animationRunning) {
+        initMatrix();
+      }
     });
   </script>
 </body>
